@@ -9,6 +9,19 @@ class App extends Component {
     this.state = {};
   }
 
+  useEffect(()=>{
+    fetch('http://localhost:5000/articles',{
+      'methods':'GET',
+      headers : {
+        'Content-Type':'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(response => setArticles(response))
+    .catch(error => console.log(error))
+
+  },[])
+
   render() {
     const styles = {
       white: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
