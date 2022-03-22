@@ -6,7 +6,9 @@ app = Flask(__name__)
 @app.route('/getOne', methods=['GET'])
 def getOneEmail():
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
+    print(request)
     sendMail(fn, ln, netid)
+    return "Done"
 
 def sendMail(fn, ln, netid):
     headers = {
