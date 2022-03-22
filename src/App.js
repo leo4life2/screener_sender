@@ -42,190 +42,189 @@ class App extends Component {
       { icon: `🤔`, text: "Item 4" },
       { icon: `😛`, text: "Item 5" }
     ];
+    const getOneNowBox = {
+      title: "Get one now.",
+      subtitle: "No passwords needed.\nJust your name and net id.",
+    };
 
-    const Content = ({ styles }) => {
-      const getOneNowBox = {
-        title: "Get one now.",
-        subtitle: "No passwords needed.\nJust your name and net id.",
-      };
+    const subscribeBox = {
+      title: "Get one every",
+      choicesPlaceHolder: "choose day",
+      choices: [
+        {value: "weekday", label: "weekday"},
+        {value: "day", label: "day"}
+      ],
+      subtitle: "Unsubscribe at any time."
+    };
 
-      const subscribeBox = {
-        title: "Get one every",
-        choicesPlaceHolder: "choose day",
-        choices: [
-          {value: "weekday", label: "weekday"},
-          {value: "day", label: "day"}
-        ],
-        subtitle: "Unsubscribe at any time."
-      };
+    const headerStyle = {
+      fontFamily: "Roboto",
+      fontSize: 48,
+      fontWeight: 900,
+      color: "#333333",
+    };
 
-      const headerStyle = {
+    const chooseMenuStyle = {
+      control: base => ({
+        ...base,
+        border: 0,
+        boxShadow: 'none',
+        paddingLeft: 20,
         fontFamily: "Roboto",
         fontSize: 48,
         fontWeight: 900,
-        color: "#333333",
-      };
+        color: '#3F3CC2',
+      }),
 
-      const chooseMenuStyle = {
-        control: base => ({
-          ...base,
-          border: 0,
-          boxShadow: 'none',
-          paddingLeft: 20,
-          fontFamily: "Roboto",
-          fontSize: 48,
-          fontWeight: 900,
+      singleValue: (styles) => {
+        return {
+          ...styles,
           color: '#3F3CC2',
-        }),
+        }
+      },
 
-        singleValue: (styles) => {
+      indicatorSeparator: (styles) => ({display:'none'}),
+      placeholder: (defaultStyles) => {
           return {
-            ...styles,
-            color: '#3F3CC2',
+              ...defaultStyles,
+              fontFamily: "Roboto",
+              fontSize: 48,
+              fontWeight: 900,
+              color: '#828282',
           }
-        },
-
-        indicatorSeparator: (styles) => ({display:'none'}),
-        placeholder: (defaultStyles) => {
-            return {
-                ...defaultStyles,
-                fontFamily: "Roboto",
-                fontSize: 48,
-                fontWeight: 900,
-                color: '#828282',
-            }
-        },
-        option: (styles, { data, isDisabled, isFocused, isSelected }) => {
-          return {
-            ...styles,
-            textAlign: "center",
-            fontFamily: "Roboto",
-            fontSize: 24,
-            fontWeight: 500,
-            color: isFocused ? '#fff' : "#333333",
-            backgroundColor: isFocused ? "#3F3CC2" : "#fff",
-          };
-        },
-      };
-
-      const subtitleStyle = {
-        paddingTop: 36,
-        paddingBottom: 53,
-
-        fontFamily: "Roboto",
-        fontSize: 24,
-        fontWeight: 600,
-        color: "#333333",
-        textAlign: "center"
-      };
-
-      const containerStyle = {
-        paddingTop: 36,
-        paddingBottom: 50,
-        marginBottom: 50,
-        alignItems: "center",
-        borderBottom: `1px solid ${styles.black(0.1)}`,
-      };
-
-      const inputBoxStyle = {
-        paddingLeft: 20,
-        paddingRight: 20,
-        width: "60%",
-        height: "100%",
-        backgroundColor: "#fbfbfb",
-        border: "0.5px solid #828282",
-        borderRadius: 10
-      };
-
-      const TextInputBox = () => {
-        const textInputStyle = {
-          width: "100%",
-          height: 67,
-          fontFamily: "Avenir",
-          fontSize: 18,
+      },
+      option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+        return {
+          ...styles,
+          textAlign: "center",
+          fontFamily: "Roboto",
+          fontSize: 24,
           fontWeight: 500,
-          borderBottomWidth: "0.5px",
-          borderBottomColor: "#828282"
+          color: isFocused ? '#fff' : "#333333",
+          backgroundColor: isFocused ? "#3F3CC2" : "#fff",
         };
+      },
+    };
 
-        const lastInputStyle = {
-          width: "100%",
-          height: 67,
-          fontFamily: "Avenir",
-          fontSize: 18,
-          fontWeight: 500,
-        };
+    const subtitleStyle = {
+      paddingTop: 36,
+      paddingBottom: 53,
 
-        return (
-          <View style={inputBoxStyle}>
-            <TextInput
-              name="fn"
-              style={textInputStyle}
-              placeholder="First Name"
-              placeholderTextColor="#828282"
-              value={this.state.fn}
-              onChangeText={(text) => this.setState({fn:text})}
-              >
-            </TextInput>
-            <TextInput
-              name="ln"
-              style={textInputStyle}
-              placeholder="Last Name"
-              placeholderTextColor="#828282"
-              value={this.state.ln}
-              onChangeText={(text) => this.setState({ln:text})}
-              >
-            </TextInput>
-            <TextInput
-              name="netid"
-              style={lastInputStyle}
-              placeholder="Net ID"
-              placeholderTextColor="#828282"
-              value={this.state.netid}
-              onChangeText={(text) => this.setState({netid:text})}
-              >
-            </TextInput>
-          </View>
-        );
-      };
+      fontFamily: "Roboto",
+      fontSize: 24,
+      fontWeight: 600,
+      color: "#333333",
+      textAlign: "center"
+    };
 
-      const buttonStyles = {
-        marginTop: 53,
-        width: "30%",
-        height: 67,
-        backgroundColor: "#3F3CC2",
-        borderRadius: 10,
-        justifyContent: "center",
-      };
+    const containerStyle = {
+      paddingTop: 36,
+      paddingBottom: 50,
+      marginBottom: 50,
+      alignItems: "center",
+      borderBottom: `1px solid #808080}`,
+    };
 
-      const BigButton = ({text}) => {
-        return (
-          <TouchableOpacity
-            onPress={() => this._getOne()}
-            style={buttonStyles}>
+    const inputBoxStyle = {
+      paddingLeft: 20,
+      paddingRight: 20,
+      width: "60%",
+      height: "100%",
+      backgroundColor: "#fbfbfb",
+      border: "0.5px solid #828282",
+      borderRadius: 10
+    };
 
-            <Text
-              style={{
-                alignSelf: 'center',
-                fontFamily: "Avenir",
-                fontSize: 24,
-                fontWeight: 900,
-                color: "#fff"
-              }}>
-              {text}
-            </Text>
+    const textInputStyle = {
+      width: "100%",
+      height: 67,
+      fontFamily: "Avenir",
+      fontSize: 18,
+      fontWeight: 500,
+      borderBottomWidth: "0.5px",
+      borderBottomColor: "#828282"
+    };
 
-          </TouchableOpacity>
-        );
-      };
+    const lastInputStyle = {
+      width: "100%",
+      height: 67,
+      fontFamily: "Avenir",
+      fontSize: 18,
+      fontWeight: 500,
+    };
 
+    const buttonStyles = {
+      marginTop: 53,
+      width: "30%",
+      height: 67,
+      backgroundColor: "#3F3CC2",
+      borderRadius: 10,
+      justifyContent: "center",
+    };
+
+    const BigButton = ({text}) => {
       return (
-        <div>
+        <TouchableOpacity
+          onPress={() => this._getOne()}
+          style={buttonStyles}>
 
+          <Text
+            style={{
+              alignSelf: 'center',
+              fontFamily: "Avenir",
+              fontSize: 24,
+              fontWeight: 900,
+              color: "#fff"
+            }}>
+            {text}
+          </Text>
+
+        </TouchableOpacity>
+      );
+    };
+
+    return (
+      <div
+        style={{
+          backgroundColor: "#fff",
+          minHeight: "100vh",
+          position: "relative"
+        }}
+      >
+        <Header styles={styles} />
+        <div>
           <View style={containerStyle}>
             <Text style={headerStyle}>{getOneNowBox.title}</Text>
             <Text style={subtitleStyle}>{getOneNowBox.subtitle}</Text>
-            <TextInputBox></TextInputBox>
+            <View style={inputBoxStyle}>
+              <TextInput
+                name="fn"
+                style={textInputStyle}
+                placeholder="First Name"
+                placeholderTextColor="#828282"
+                value={this.state.fn}
+                onChangeText={(text) => this.setState({fn:text})}
+                >
+              </TextInput>
+              <TextInput
+                name="ln"
+                style={textInputStyle}
+                placeholder="Last Name"
+                placeholderTextColor="#828282"
+                value={this.state.ln}
+                onChangeText={(text) => this.setState({ln:text})}
+                >
+              </TextInput>
+              <TextInput
+                name="netid"
+                style={lastInputStyle}
+                placeholder="Net ID"
+                placeholderTextColor="#828282"
+                value={this.state.netid}
+                onChangeText={(text) => this.setState({netid:text})}
+                >
+              </TextInput>
+            </View>
             <BigButton text="Get it!"></BigButton>
           </View>
 
@@ -241,25 +240,40 @@ class App extends Component {
             </Select>
 
             <Text style={subtitleStyle}>{subscribeBox.subtitle}</Text>
-            <TextInputBox></TextInputBox>
+            <View style={inputBoxStyle}>
+              <TextInput
+                name="fn"
+                style={textInputStyle}
+                placeholder="First Name"
+                placeholderTextColor="#828282"
+                value={this.state.fn}
+                onChangeText={(text) => this.setState({fn:text})}
+                >
+              </TextInput>
+              <TextInput
+                name="ln"
+                style={textInputStyle}
+                placeholder="Last Name"
+                placeholderTextColor="#828282"
+                value={this.state.ln}
+                onChangeText={(text) => this.setState({ln:text})}
+                >
+              </TextInput>
+              <TextInput
+                name="netid"
+                style={lastInputStyle}
+                placeholder="Net ID"
+                placeholderTextColor="#828282"
+                value={this.state.netid}
+                onChangeText={(text) => this.setState({netid:text})}
+                >
+              </TextInput>
+            </View>
             <BigButton text="Subscribe"></BigButton>
           </View>
 
 
         </div>
-      );
-    };
-
-    return (
-      <div
-        style={{
-          backgroundColor: styles.white(),
-          minHeight: "100vh",
-          position: "relative"
-        }}
-      >
-        <Header styles={styles} />
-        <Content styles={styles} state={this.state} handleGetOne={this._getOne} />
         <FooterMenu menuItems={menuItems} styles={styles} />
       </div>
     );
