@@ -9,9 +9,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      fn: "",
-      ln: "",
-      netid: "",
+      fn: localStorage.getItem("fName"),
+      ln: localStorage.getItem("lName"),
+      netid: localStorage.getItem("netId"),
       choice: ""
     };
   }
@@ -26,6 +26,9 @@ class App extends Component {
       }
     );
     window.location.href = `/screenerPage?fn=${this.state.fn}&ln=${this.state.ln}`;
+    localStorage.setItem("fName", this.state.fn);
+    localStorage.setItem("lName", this.state.ln);
+    localStorage.setItem("netId", this.state.netid);
   };
 
   _subscribe() {
@@ -43,6 +46,9 @@ class App extends Component {
       console.log(data);
       alert(data.message);
      });
+     localStorage.setItem("fName", this.state.fn);
+     localStorage.setItem("lName", this.state.ln);
+     localStorage.setItem("netId", this.state.netid);
   };
 
   render() {

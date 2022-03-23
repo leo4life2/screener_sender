@@ -13,7 +13,7 @@ mysql.init_app(app)
 def sendEveryoneEmails():
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.callproc('sp_getAllUsers',())
+    cursor.execute("select * from tbl_user;")
     allusers = cursor.fetchall()
     for u in allusers:
         id, fn, ln, netid, choice = u
@@ -88,30 +88,43 @@ def subscribe():
 
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.callproc('sp_createUser',(fn, ln, netid, choice))
+    cursor.execute(f"select * from tbl_user where user_netid = \"{netid}\"")
     data = cursor.fetchall()
-    print("from sql: ", data)
-
-    if len(data) == 0:
-        conn.commit()
+    if len(data) > 0:
+        response = make_response(
+            jsonify(
+                {"message": "This Net ID has already subscribed to the service."}
+            ),
+            200
+        )
+        response.headers["Content-Type"] = "application/json"
+        return response
+    try:
         sendMail(fn, ln, netid)
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute(f"insert into tbl_user(user_fn, user_ln, user_netid, mail_freq) values (\"{fn}\", \"{ln}\", \"{netid}\", \"{choice}\");")
+        conn.commit()
+
         response = make_response(
             jsonify(
-                {"message": 'Subscribe Successful!'}
+                {"message": "Subscribe successful!"}
             ),
             200
         )
         response.headers["Content-Type"] = "application/json"
         return response
-    else:
+    except Exception as e:
+        print(e)
         response = make_response(
             jsonify(
-                {"message": str(data[0][0])}
+                {"message": str(e)}
             ),
-            200
+            500
         )
         response.headers["Content-Type"] = "application/json"
         return response
+
 
 def sendMail(fn, ln, netid):
     headers = {
@@ -124,7 +137,7 @@ def sendMail(fn, ln, netid):
 
 if __name__ == "__main__":
     app.run()
-    schedule.every().day.at("06:30").do(sendEveryoneEmails)
+    schedule.every().day.at("01:35").do(sendEveryoneEmails)
     while True:
         schedule.run_pending()
         time.sleep(1)
