@@ -43,6 +43,8 @@ def preprocessInput(fn, ln, netid):
 def validateData(fn, ln, netid):
     name_regex = '[A-Za-z]{2,25}||\s[A-Za-z]{2,25}'
     netid_regex = '[A-Za-z]{2,3}[0-9]{3,4}'
+    if len(netid) > 7:
+        return False
     nameOk = re.findall(name_regex, fn) and re.findall(name_regex, ln)
     netidOk = re.findall(netid_regex, netid)
     return bool(nameOk and netidOk)
