@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify, make_response
 from flaskext.mysql import MySQL
-import requests, re, os, datetime, schedule, time
+from apscheduler.schedulers.background import BackgroundScheduler
+import requests, re, os, datetime, time
 
 app = Flask(__name__, static_folder="build/static", template_folder="build")
 mysql = MySQL()
@@ -138,9 +139,10 @@ def sendMail(fn, ln, netid):
 
     response = requests.get(f"https://nyushc.iad1.qualtrics.com/jfe/form/SV_515wVHTcq6PLe5w?p_fn={fn}&p_ln={ln}&n_em={netid}@nyu.edu&is_vax=Y&last_screener=&p_afl=student", headers=headers)
 
+
+sched = BackgroundScheduler(daemon=True)
+sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='30')
+sched.start()
+
 if __name__ == "__main__":
     app.run()
-    schedule.every().day.at("01:45").do(sendEveryoneEmails)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
