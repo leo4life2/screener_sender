@@ -12,10 +12,13 @@ app.config['MYSQL_DATABASE_HOST'] = os.getenv("DB_HOST")
 mysql.init_app(app)
 
 @app.route('/sendAll')
-def sendEveryoneEmails():
+def sendAllManual():
     pw = request.args.get('pw')
     if pw != "DsScreener123":
         return
+    sendEveryoneEmails()
+
+def sendEveryoneEmails():
     print("--SENDING EVERYONE EMAILS--")
     conn = mysql.connect()
     cursor = conn.cursor()
@@ -148,7 +151,7 @@ def sendMail(fn, ln, netid):
 
 
 sched = BackgroundScheduler(daemon=True)
-sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='30')
+sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='42')
 sched.start()
 
 if __name__ == "__main__":
