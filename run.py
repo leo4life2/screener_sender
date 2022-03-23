@@ -62,13 +62,27 @@ def subscribe():
     fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
-    print(fn, ln, netid, choice)
+    print("subscribe1", fn, ln, netid, choice)
 
     if not validateData(fn, ln, netid):
-        return "Illegal input. Please check your inputs."
+        response = make_response(
+            jsonify(
+                {"message": "Illegal input. Please check your inputs."}
+            ),
+            200
+        )
+        response.headers["Content-Type"] = "application/json"
+        return response
 
     if choice not in ["day", "weekday"]:
-        return "Bad Input."
+        response = make_response(
+            jsonify(
+                {"message": "You did not choose a day."}
+            ),
+            200
+        )
+        response.headers["Content-Type"] = "application/json"
+        return response
 
     print("subscribe", fn, ln, netid, choice)
 
