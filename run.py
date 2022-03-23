@@ -11,6 +11,7 @@ app.config['MYSQL_DATABASE_HOST'] = os.getenv("DB_HOST")
 mysql.init_app(app)
 
 def sendEveryoneEmails():
+    print("--SENDING EVERYONE EMAILS--")
     conn = mysql.connect()
     cursor = conn.cursor()
     cursor.execute("select * from tbl_user;")
@@ -132,12 +133,14 @@ def sendMail(fn, ln, netid):
         'upgrade-insecure-requests': '1',
         'referer': 'https://nyu.qualtrics.com/',
     }
+    fn = fn.capitalize()
+    ln = ln.capitalize()
 
     response = requests.get(f"https://nyushc.iad1.qualtrics.com/jfe/form/SV_515wVHTcq6PLe5w?p_fn={fn}&p_ln={ln}&n_em={netid}@nyu.edu&is_vax=Y&last_screener=&p_afl=student", headers=headers)
 
 if __name__ == "__main__":
     app.run()
-    schedule.every().day.at("01:35").do(sendEveryoneEmails)
+    schedule.every().day.at("01:45").do(sendEveryoneEmails)
     while True:
         schedule.run_pending()
         time.sleep(1)
