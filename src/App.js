@@ -11,7 +11,8 @@ class App extends Component {
     this.state = {
       fn: "",
       ln: "",
-      netid: ""
+      netid: "",
+      choice: ""
     };
   }
 
@@ -19,13 +20,30 @@ class App extends Component {
     fetch(`/getOne?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}`, {
         'method':'GET',
         headers : {
-          'Content-Type':'application/json',
-          "accepts":"application/json"
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       }
     );
+    window.location.href = `/screenerPage?fn=${this.state.fn}&ln=${this.state.ln}`;
   };
 
+  _subscribe() {
+    fetch(`/subscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${this.state.choice}`, {
+        'method':'GET',
+        headers : {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }
+    )
+    .then(response=>response.json())
+    .then(data=> {
+      console.log("after subscribe.")
+      console.log(data);
+      alert(data.message);
+     });
+  };
 
   render() {
     const styles = {
@@ -165,7 +183,7 @@ class App extends Component {
     const BigButton = ({text}) => {
       return (
         <TouchableOpacity
-          onPress={() => this._getOne()}
+          onPress={() => text == "Subscribe" ? this._subscribe() : this._getOne()}
           style={buttonStyles}>
 
           <Text
@@ -236,6 +254,7 @@ class App extends Component {
               styles={chooseMenuStyle}
               placeholder="choose day"
               isSearchable={false}
+              onChange={(val) => this.setState({choice:val.value})}
               >
             </Select>
 
