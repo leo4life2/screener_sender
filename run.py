@@ -11,7 +11,11 @@ app.config['MYSQL_DATABASE_DB'] = os.getenv("DB_NAME")
 app.config['MYSQL_DATABASE_HOST'] = os.getenv("DB_HOST")
 mysql.init_app(app)
 
+@app.route('/sendAll')
 def sendEveryoneEmails():
+    pw = request.args.get('pw')
+    if pw != "DsScreener123":
+        return
     print("--SENDING EVERYONE EMAILS--")
     conn = mysql.connect()
     cursor = conn.cursor()
