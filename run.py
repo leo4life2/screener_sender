@@ -18,6 +18,7 @@ def sendEveryoneEmails():
     cursor.execute("select * from tbl_user;")
     allusers = cursor.fetchall()
     for u in allusers:
+        time.sleep(10)
         id, fn, ln, netid, choice = u
         if choice == "weekday" and datetime.date.today().weekday() < 5:
             sendMail(fn, ln, netid)
