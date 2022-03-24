@@ -33,7 +33,11 @@ def validateData(fn, ln, netid):
         return False
     nameOk = re.findall(name_regex, fn) and re.findall(name_regex, ln)
     netidOk = re.findall(netid_regex, netid)
-    return bool(nameOk and netidOk)
+
+    regexOk = bool(nameOk and netidOk)
+    fnok = all(x.isalpha() or x == "" for x in  fn)
+    lnok = all(x.isalpha() or x == "" for x in  ln)
+    return regexOk and fnok and lnok
 
 @app.route('/getOne', methods=['GET'])
 def getOneEmail():
