@@ -12,7 +12,8 @@ class App extends Component {
       fn: localStorage.getItem("fName"),
       ln: localStorage.getItem("lName"),
       netid: localStorage.getItem("netId"),
-      choice: ""
+      choice: "",
+      buttonDisabled: false
     };
   }
 
@@ -189,8 +190,20 @@ class App extends Component {
     const BigButton = ({text}) => {
       return (
         <TouchableOpacity
-          onPress={() => text == "Subscribe" ? this._subscribe() : this._getOne()}
-          style={buttonStyles}>
+          onPress={() => {
+             text == "Subscribe" ? this._subscribe() : this._getOne()
+             this.setState({
+                buttonDisabled: true,
+              });
+              setTimeout(() => {
+                  this.setState(() => ({
+                    buttonDisabled: false,
+                  }));
+                }, 2000); // 2 second cooldown
+           }}
+          style={buttonStyles}
+          disabled={this.state.buttonDisabled}
+          >
 
           <Text
             style={{

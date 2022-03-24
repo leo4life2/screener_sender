@@ -151,11 +151,11 @@ def sendMail(fn, ln, netid):
 
     response = requests.get(f"https://nyushc.iad1.qualtrics.com/jfe/form/SV_515wVHTcq6PLe5w?p_fn={fn}&p_ln={ln}&n_em={netid}@nyu.edu&is_vax=Y&last_screener=&p_afl=student", headers=headers)
 
-
-print(time.time(), os.getpid())
-sched = BackgroundScheduler(daemon=True)
-sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='42')
-sched.start()
+if not app.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+    print("Scheduler initialized")
+    sched = BackgroundScheduler(daemon=True)
+    sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='42')
+    sched.start()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(use_reloader=False)
