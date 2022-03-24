@@ -1,7 +1,9 @@
 APScheduler==3.9.1
 certifi==2021.10.8
+cffi==1.15.0
 charset-normalizer==2.0.12
 click==8.0.4
+cryptography==36.0.2
 DateTime==4.4
 Flask==2.0.3
 Flask-MySQL==1.5.2
@@ -13,6 +15,7 @@ MarkupSafe==2.1.1
 mysql-connector-python==8.0.28
 mysqlclient==2.1.0
 protobuf==3.19.4
+pycparser==2.21
 PyMySQL==1.0.2
 python-dotenv==0.19.2
 pytz==2022.1

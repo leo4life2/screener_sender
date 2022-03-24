@@ -52,6 +52,23 @@ class App extends Component {
      localStorage.setItem("netId", this.state.netid);
   };
 
+  _unsubscribe() {
+    fetch(`/unsubscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}`, {
+        'method':'GET',
+        headers : {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }
+    )
+    .then(response=>response.json())
+    .then(data=> {
+      console.log("after unsubscribe.")
+      console.log(data);
+      alert(data.message);
+     });
+  };
+
   render() {
     const styles = {
       white: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -187,6 +204,13 @@ class App extends Component {
       justifyContent: "center",
     };
 
+    const unsubscribeStyle = {
+      marginTop: 23,
+      width: "20%",
+      height: 25,
+      justifyContent: "center",
+    };
+
     const BigButton = ({text}) => {
       return (
         <TouchableOpacity
@@ -231,41 +255,6 @@ class App extends Component {
         <Header styles={styles} />
         <div>
           <View style={containerStyle}>
-            <Text style={headerStyle}>{getOneNowBox.title}</Text>
-            <Text style={subtitleStyle}>{getOneNowBox.subtitle}</Text>
-            <View style={inputBoxStyle}>
-              <TextInput
-                name="fn"
-                style={textInputStyle}
-                placeholder="First Name"
-                placeholderTextColor="#828282"
-                value={this.state.fn}
-                onChangeText={(text) => this.setState({fn:text})}
-                >
-              </TextInput>
-              <TextInput
-                name="ln"
-                style={textInputStyle}
-                placeholder="Last Name"
-                placeholderTextColor="#828282"
-                value={this.state.ln}
-                onChangeText={(text) => this.setState({ln:text})}
-                >
-              </TextInput>
-              <TextInput
-                name="netid"
-                style={lastInputStyle}
-                placeholder="Net ID"
-                placeholderTextColor="#828282"
-                value={this.state.netid}
-                onChangeText={(text) => this.setState({netid:text})}
-                >
-              </TextInput>
-            </View>
-            <BigButton text="Get it!"></BigButton>
-          </View>
-
-          <View style={containerStyle}>
             <Text style={headerStyle}>{subscribeBox.title}</Text>
 
             <Select
@@ -308,10 +297,72 @@ class App extends Component {
               </TextInput>
             </View>
             <BigButton text="Subscribe"></BigButton>
+
+            <TouchableOpacity
+              onPress={() => {
+                this._unsubscribe()
+                 this.setState({
+                    buttonDisabled: true,
+                  });
+                  setTimeout(() => {
+                      this.setState(() => ({
+                        buttonDisabled: false,
+                      }));
+                    }, 2000); // 2 second cooldown
+               }}
+              style={unsubscribeStyle}
+              disabled={this.state.buttonDisabled}
+              >
+              <Text
+                style={{
+                  alignSelf: 'center',
+                  fontFamily: "Avenir",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: "#828282"
+                }}>
+                {"Unsubscribe"}
+              </Text>
+
+            </TouchableOpacity>
           </View>
-
-
+          
+          <View style={containerStyle}>
+            <Text style={headerStyle}>{getOneNowBox.title}</Text>
+            <Text style={subtitleStyle}>{getOneNowBox.subtitle}</Text>
+            <View style={inputBoxStyle}>
+              <TextInput
+                name="fn"
+                style={textInputStyle}
+                placeholder="First Name"
+                placeholderTextColor="#828282"
+                value={this.state.fn}
+                onChangeText={(text) => this.setState({fn:text})}
+                >
+              </TextInput>
+              <TextInput
+                name="ln"
+                style={textInputStyle}
+                placeholder="Last Name"
+                placeholderTextColor="#828282"
+                value={this.state.ln}
+                onChangeText={(text) => this.setState({ln:text})}
+                >
+              </TextInput>
+              <TextInput
+                name="netid"
+                style={lastInputStyle}
+                placeholder="Net ID"
+                placeholderTextColor="#828282"
+                value={this.state.netid}
+                onChangeText={(text) => this.setState({netid:text})}
+                >
+              </TextInput>
+            </View>
+            <BigButton text="Get it!"></BigButton>
+          </View>
         </div>
+
         <FooterMenu menuItems={menuItems} styles={styles} />
       </div>
     );

@@ -43,53 +43,34 @@ def getOneEmail():
     if not validateData(fn, ln, netid):
         return "Illegal input. Please check your inputs."
 
-    print("getOne", fn, ln, netid)
+    print("getOne: ", fn, ln, netid)
 
     sendMail(fn, ln, netid)
     return "OK"
 
 @app.route('/subscribe', methods=['GET'])
 def subscribe():
-    print("subscribe", os.getpid())
     fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
-    print("subscribe1", fn, ln, netid, choice)
+    print("Subscribe attempt: ", fn, ln, netid, choice, os.getpid())
 
     if not validateData(fn, ln, netid):
-        response = make_response(
-            jsonify(
-                {"message": "Illegal input. Please check your inputs."}
-            ),
-            200
-        )
-        response.headers["Content-Type"] = "application/json"
+        response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
         return response
 
     if choice not in ["day", "weekday"]:
-        response = make_response(
-            jsonify(
-                {"message": "You did not choose a day."}
-            ),
-            200
-        )
-        response.headers["Content-Type"] = "application/json"
+        response = makeJsonRspWithMsg("You did not choose a day.", 200)
         return response
 
-    print("subscribe", fn, ln, netid, choice)
+    print("Subscribe successful: ", fn, ln, netid, choice, os.getpid())
 
     conn = mysql.connect()
     cursor = conn.cursor()
     cursor.execute(f"select * from tbl_user where user_netid = \"{netid}\"")
     data = cursor.fetchall()
     if len(data) > 0:
-        response = make_response(
-            jsonify(
-                {"message": "This Net ID has already subscribed to the service."}
-            ),
-            200
-        )
-        response.headers["Content-Type"] = "application/json"
+        response = makeJsonRspWithMsg("This Net ID has already subscribed to the service.", 200)
         return response
     try:
         sendMail(fn, ln, netid)
@@ -98,25 +79,44 @@ def subscribe():
         cursor.execute(f"insert into tbl_user(user_fn, user_ln, user_netid, mail_freq) values (\"{fn}\", \"{ln}\", \"{netid}\", \"{choice}\");")
         conn.commit()
 
-        response = make_response(
-            jsonify(
-                {"message": "Subscribe successful!"}
-            ),
-            200
-        )
-        response.headers["Content-Type"] = "application/json"
+        response = makeJsonRspWithMsg("Subscribe successful!", 200)
         return response
     except Exception as e:
         print(e)
-        response = make_response(
-            jsonify(
-                {"message": str(e)}
-            ),
-            500
-        )
-        response.headers["Content-Type"] = "application/json"
+        response = makeJsonRspWithMsg(str(e), 500)
         return response
 
+@app.route('/unsubscribe', methods=['GET'])
+def unsubscribe():
+    fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
+    fn, ln, netid = preprocessInput(fn, ln, netid)
+
+    if not validateData(fn, ln, netid):
+        response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
+        return response
+
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    selectst = f'SELECT * FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+    cursor.execute(selectst)
+    data = cursor.fetchall()
+    if len(data) > 0: # User exists
+        delst = f'DELETE FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+        cursor.execute(delst)
+        conn.commit()
+        return makeJsonRspWithMsg("Unsubscribe successful", 200)
+
+    return makeJsonRspWithMsg(f"No user with ID {fn.capitalize()} {ln.capitalize()} {netid} found.", 500)
+
+def makeJsonRspWithMsg(msg, status):
+    response = make_response(
+        jsonify(
+            {"message": str(msg)}
+        ),
+        int(status)
+    )
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 def sendMail(fn, ln, netid):
     headers = {
