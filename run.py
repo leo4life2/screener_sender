@@ -19,7 +19,7 @@ def sendAllManual():
     sendEveryoneEmails()
 
 def sendEveryoneEmails():
-    print("--SENDING EVERYONE EMAILS--")
+    print("--SENDING EVERYONE EMAILS--", time.time(), os.getpid())
     conn = mysql.connect()
     cursor = conn.cursor()
     cursor.execute("select * from tbl_user;")
@@ -59,6 +59,7 @@ def validateData(fn, ln, netid):
 
 @app.route('/getOne', methods=['GET'])
 def getOneEmail():
+    print("getOne", os.getpid())
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)
     if not validateData(fn, ln, netid):
@@ -71,6 +72,7 @@ def getOneEmail():
 
 @app.route('/subscribe', methods=['GET'])
 def subscribe():
+    print("subscribe", os.getpid())
     fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
@@ -150,6 +152,7 @@ def sendMail(fn, ln, netid):
     response = requests.get(f"https://nyushc.iad1.qualtrics.com/jfe/form/SV_515wVHTcq6PLe5w?p_fn={fn}&p_ln={ln}&n_em={netid}@nyu.edu&is_vax=Y&last_screener=&p_afl=student", headers=headers)
 
 
+print(time.time(), os.getpid())
 sched = BackgroundScheduler(daemon=True)
 sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='42')
 sched.start()
