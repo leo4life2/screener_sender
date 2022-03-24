@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template, jsonify, make_response
 from flaskext.mysql import MySQL
-from apscheduler.schedulers.background import BackgroundScheduler
 import requests, re, os, datetime, time
 
 app = Flask(__name__, static_folder="build/static", template_folder="build")
@@ -10,27 +9,6 @@ app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv("DB_PW")
 app.config['MYSQL_DATABASE_DB'] = os.getenv("DB_NAME")
 app.config['MYSQL_DATABASE_HOST'] = os.getenv("DB_HOST")
 mysql.init_app(app)
-
-@app.route('/sendAll')
-def sendAllManual():
-    pw = request.args.get('pw')
-    if pw != "DsScreener123":
-        return
-    sendEveryoneEmails()
-
-def sendEveryoneEmails():
-    print("--SENDING EVERYONE EMAILS--", time.time(), os.getpid())
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    cursor.execute("select * from tbl_user;")
-    allusers = cursor.fetchall()
-    for u in allusers:
-        time.sleep(10)
-        id, fn, ln, netid, choice = u
-        if choice == "weekday" and datetime.date.today().weekday() < 5:
-            sendMail(fn, ln, netid)
-        else:
-            sendMail(fn, ln, netid)
 
 @app.route('/')
 @app.route('/index')
@@ -151,11 +129,5 @@ def sendMail(fn, ln, netid):
 
     response = requests.get(f"https://nyushc.iad1.qualtrics.com/jfe/form/SV_515wVHTcq6PLe5w?p_fn={fn}&p_ln={ln}&n_em={netid}@nyu.edu&is_vax=Y&last_screener=&p_afl=student", headers=headers)
 
-if not app.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
-    print("Scheduler initialized", os.getpid())
-    sched = BackgroundScheduler(daemon=True)
-    sched.add_job(sendEveryoneEmails, 'cron', hour='06', minute='42')
-    sched.start()
-
 if __name__ == "__main__":
-    app.run(use_reloader=False)
+    app.run()
