@@ -1,5 +1,4 @@
-import requests, os, datetime, time
-import sys
+import requests, os, datetime, time, sys
 import mysql.connector
 USER = os.getenv("DB_USERNAME")
 PW = os.getenv("DB_PW")
@@ -15,7 +14,7 @@ def sendEveryoneEmails():
     cursor.execute(query)
 
     for u in cursor:
-        time.sleep(10)
+        time.sleep(3)
         id, fn, ln, netid, choice = u
         if choice == "weekday" and datetime.date.today().weekday() < 5:
             sendMail(fn, ln, netid)
