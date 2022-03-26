@@ -12,10 +12,10 @@ mysql.init_app(app)
 
 localmode = False
 
-logging.getLogger("werkzeug").disabled = True
+logging.getLogger("werkzeug").info("HHIIHIHIHIHIHIHIHHIHIHIHIHIHIHIHIHIHIH")
 
 if os.getenv("DB_USERNAME") == "root" or os.getenv("DB_USERNAME") == "":
-    app.logger.info("-----LOCAL DEBUG MODE------")
+    print("-----LOCAL DEBUG MODE------")
     localmode = True
 
 @app.route('/')
@@ -49,14 +49,15 @@ def validateData(fn, ln, netid):
 
 @app.route('/getOne', methods=['GET'])
 def getOneEmail():
+    print(request)
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
     if not validateData(fn, ln, netid):
-        app.logger.info(f"[Get One] -Illegal Input- {fn} {ln} {netid}")
+        print(f"[Get One] -Illegal Input- {fn} {ln} {netid}")
         return "Illegal input. Please check your inputs."
 
-    app.logger.info(f"[Get One] {fn} {ln} {netid}")
+    print(f"[Get One] {fn} {ln} {netid}")
 
     sendMail(fn, ln, netid)
     return "OK"
@@ -66,7 +67,7 @@ def subscribe():
     fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
-    app.logger.info(f"[Subscribe] {fn} {ln} {netid}")
+    print(f"[Subscribe] {fn} {ln} {netid}")
 
     if not validateData(fn, ln, netid):
         response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
@@ -76,7 +77,7 @@ def subscribe():
         response = makeJsonRspWithMsg("You did not choose a day.", 200)
         return response
 
-    app.logger.info(f"[Subscribe] -Success- {fn} {ln} {netid}")
+    print(f"[Subscribe] -Success- {fn} {ln} {netid}")
 
     conn = mysql.connect()
     cursor = conn.cursor()
@@ -95,7 +96,7 @@ def subscribe():
         response = makeJsonRspWithMsg("Subscribe successful!", 200)
         return response
     except Exception as e:
-        app.logger.error(f"[Subscribe] -Fail- {fn} {ln} {netid}")
+        print(f"[Subscribe] -Fail- {fn} {ln} {netid}")
         response = makeJsonRspWithMsg(str(e), 500)
         return response
 
@@ -104,7 +105,7 @@ def unsubscribe():
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
-    app.logger.info(f"[Unsubscribe] {fn} {ln} {netid}")
+    print(f"[Unsubscribe] {fn} {ln} {netid}")
 
     if not validateData(fn, ln, netid):
         response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
@@ -120,12 +121,12 @@ def unsubscribe():
             delst = f'DELETE FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
             cursor.execute(delst)
             conn.commit()
-            app.logger.info(f"[Unsubscribe] -Success- {fn} {ln} {netid}")
+            print(f"[Unsubscribe] -Success- {fn} {ln} {netid}")
             return makeJsonRspWithMsg("Unsubscribe successful", 200)
         return makeJsonRspWithMsg(f"No user with ID {fn.capitalize()} {ln.capitalize()} {netid} found.", 500)
 
     except Exception as e:
-        app.logger.error(f"[Unsubscribe] -Fail- {fn} {ln} {netid}")
+        print(f"[Unsubscribe] -Fail- {fn} {ln} {netid}")
         response = makeJsonRspWithMsg(str(e), 500)
         return response
 
@@ -141,7 +142,7 @@ def makeJsonRspWithMsg(msg, status):
 
 def sendMail(fn, ln, netid):
     if localmode:
-        app.logger.info(f"[Send Mail] Won't send mail for local testing.")
+        print(f"[Send Mail] Won't send mail for local testing.")
         return
     headers = {
         'authority': 'nyushc.iad1.qualtrics.com',
