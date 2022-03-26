@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, jsonify, make_response
 from flaskext.mysql import MySQL
-import requests, re, os, datetime, time
+import requests, re, os, datetime, time, logging
 
 app = Flask(__name__, static_folder="build/static", template_folder="build")
 mysql = MySQL()
@@ -9,6 +9,14 @@ app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv("DB_PW")
 app.config['MYSQL_DATABASE_DB'] = os.getenv("DB_NAME")
 app.config['MYSQL_DATABASE_HOST'] = os.getenv("DB_HOST")
 mysql.init_app(app)
+
+localmode = False
+
+logging.getLogger("werkzeug").disabled = True
+
+if os.getenv("DB_USERNAME") == "root" or os.getenv("DB_USERNAME") == "":
+    app.logger.info("-----LOCAL DEBUG MODE------")
+    localmode = True
 
 @app.route('/')
 @app.route('/index')
@@ -41,13 +49,14 @@ def validateData(fn, ln, netid):
 
 @app.route('/getOne', methods=['GET'])
 def getOneEmail():
-    print("getOne", os.getpid())
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)
+
     if not validateData(fn, ln, netid):
+        app.logger.info(f"[Get One] -Illegal Input- {fn} {ln} {netid}")
         return "Illegal input. Please check your inputs."
 
-    print("getOne: ", fn, ln, netid)
+    app.logger.info(f"[Get One] {fn} {ln} {netid}")
 
     sendMail(fn, ln, netid)
     return "OK"
@@ -57,7 +66,7 @@ def subscribe():
     fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
-    print("Subscribe attempt: ", fn, ln, netid, choice, os.getpid())
+    app.logger.info(f"[Subscribe] {fn} {ln} {netid}")
 
     if not validateData(fn, ln, netid):
         response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
@@ -67,7 +76,7 @@ def subscribe():
         response = makeJsonRspWithMsg("You did not choose a day.", 200)
         return response
 
-    print("Subscribe successful: ", fn, ln, netid, choice, os.getpid())
+    app.logger.info(f"[Subscribe] -Success- {fn} {ln} {netid}")
 
     conn = mysql.connect()
     cursor = conn.cursor()
@@ -86,7 +95,7 @@ def subscribe():
         response = makeJsonRspWithMsg("Subscribe successful!", 200)
         return response
     except Exception as e:
-        print(e)
+        app.logger.error(f"[Subscribe] -Fail- {fn} {ln} {netid}")
         response = makeJsonRspWithMsg(str(e), 500)
         return response
 
@@ -95,22 +104,30 @@ def unsubscribe():
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
+    app.logger.info(f"[Unsubscribe] {fn} {ln} {netid}")
+
     if not validateData(fn, ln, netid):
         response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
         return response
 
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    selectst = f'SELECT * FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
-    cursor.execute(selectst)
-    data = cursor.fetchall()
-    if len(data) > 0: # User exists
-        delst = f'DELETE FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
-        cursor.execute(delst)
-        conn.commit()
-        return makeJsonRspWithMsg("Unsubscribe successful", 200)
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        selectst = f'SELECT * FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+        cursor.execute(selectst)
+        data = cursor.fetchall()
+        if len(data) > 0: # User exists
+            delst = f'DELETE FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+            cursor.execute(delst)
+            conn.commit()
+            app.logger.info(f"[Unsubscribe] -Success- {fn} {ln} {netid}")
+            return makeJsonRspWithMsg("Unsubscribe successful", 200)
+        return makeJsonRspWithMsg(f"No user with ID {fn.capitalize()} {ln.capitalize()} {netid} found.", 500)
 
-    return makeJsonRspWithMsg(f"No user with ID {fn.capitalize()} {ln.capitalize()} {netid} found.", 500)
+    except Exception as e:
+        app.logger.error(f"[Unsubscribe] -Fail- {fn} {ln} {netid}")
+        response = makeJsonRspWithMsg(str(e), 500)
+        return response
 
 def makeJsonRspWithMsg(msg, status):
     response = make_response(
@@ -123,6 +140,9 @@ def makeJsonRspWithMsg(msg, status):
     return response
 
 def sendMail(fn, ln, netid):
+    if localmode:
+        app.logger.info(f"[Send Mail] Won't send mail for local testing.")
+        return
     headers = {
         'authority': 'nyushc.iad1.qualtrics.com',
         'upgrade-insecure-requests': '1',
