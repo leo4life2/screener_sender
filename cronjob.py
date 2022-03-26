@@ -18,7 +18,7 @@ def sendEveryoneEmails():
         id, fn, ln, netid, choice = u
         if choice == "weekday" and datetime.date.today().weekday() < 5:
             sendMail(fn, ln, netid)
-        else:
+        elif choice == "day":
             sendMail(fn, ln, netid)
 
     cursor.close()

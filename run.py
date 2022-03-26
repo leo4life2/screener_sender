@@ -49,7 +49,6 @@ def validateData(fn, ln, netid):
 
 @app.route('/getOne', methods=['GET'])
 def getOneEmail():
-    print(request)
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)
 
