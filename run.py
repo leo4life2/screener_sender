@@ -3,6 +3,7 @@ from flaskext.mysql import MySQL
 import requests, re, os, datetime, time, logging
 
 app = Flask(__name__, static_folder="build/static", template_folder="build")
+
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = os.getenv("DB_USERNAME")
 app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv("DB_PW")
@@ -11,8 +12,6 @@ app.config['MYSQL_DATABASE_HOST'] = os.getenv("DB_HOST")
 mysql.init_app(app)
 
 localmode = False
-
-logging.getLogger("werkzeug").info("HHIIHIHIHIHIHIHIHHIHIHIHIHIHIHIHIHIHIH")
 
 if os.getenv("DB_USERNAME") == "root" or os.getenv("DB_USERNAME") == "":
     print("-----LOCAL DEBUG MODE------")
