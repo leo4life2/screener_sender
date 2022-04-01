@@ -256,7 +256,6 @@ class App extends Component {
         <div>
           <View style={containerStyle}>
             <Text style={headerStyle}>{subscribeBox.title}</Text>
-
             <Select
               options={subscribeBox.choices}
               styles={chooseMenuStyle}
@@ -326,7 +325,7 @@ class App extends Component {
 
             </TouchableOpacity>
           </View>
-          
+
           <View style={containerStyle}>
             <Text style={headerStyle}>{getOneNowBox.title}</Text>
             <Text style={subtitleStyle}>{getOneNowBox.subtitle}</Text>
