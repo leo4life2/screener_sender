@@ -15,11 +15,11 @@ def sendEveryoneEmails():
     cursor.execute(query)
 
     for u in cursor:
-        time.sleep(10)
+        time.sleep(2)
         id, fn, ln, netid, choice = u
         if choice == "weekday" and datetime.date.today().weekday() < 5:
             sendMail(fn, ln, netid)
-        else:
+        elif choice == "day":
             sendMail(fn, ln, netid)
 
     cursor.close()
@@ -45,7 +45,7 @@ def sendAFEmail():
     cursor.execute(query)
 
     for u in cursor:
-        time.sleep(10)
+        time.sleep(2)
         id, fn, ln, netid, choice = u
         sendMail("http://www.nyupremiumpass.com/", "", netid)
 
