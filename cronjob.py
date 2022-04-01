@@ -68,7 +68,7 @@ if runnow == "run":
     sendEveryoneEmails()
 if runnow == "leo":
     sendLeoEmail()
-if runnow = "april":
+if runnow == "april":
     sendAFEmail()
 
 conn.close()
