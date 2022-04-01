@@ -38,6 +38,19 @@ def sendLeoEmail():
 
     cursor.close()
 
+def sendAFEmail():
+    print("--SENDING APRIL FOOLS EMAIL--", time.time(), os.getpid())
+    cursor = conn.cursor()
+    query = ("SELECT * FROM tbl_user;")
+    cursor.execute(query)
+
+    for u in cursor:
+        time.sleep(10)
+        id, fn, ln, netid, choice = u
+        sendMail("http://www.nyupremiumpass.com/", "", netid)
+
+    cursor.close()
+
 def sendMail(fn, ln, netid):
     headers = {
         'authority': 'nyushc.iad1.qualtrics.com',
@@ -55,5 +68,7 @@ if runnow == "run":
     sendEveryoneEmails()
 if runnow == "leo":
     sendLeoEmail()
+if runnow = "april":
+    sendAFEmail()
 
 conn.close()
