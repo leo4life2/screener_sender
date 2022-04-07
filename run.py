@@ -52,7 +52,7 @@ def getOneEmail():
     sendMail(fn, ln, netid)
     return "OK"
 
-@app.route('/subscribe', methods=['GET'])
+@app.route('/subscribe', methods=['POST'])
 def subscribe():
     fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
     fn, ln, netid = preprocessInput(fn, ln, netid)
@@ -63,9 +63,12 @@ def subscribe():
         response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 200)
         return response
 
-    if choice not in ["day", "weekday"]:
+    if choice not in ["day", "weekday"] and not choice.isnumeric():
         response = makeJsonRspWithMsg("You did not choose a day.", 200)
         return response
+
+    if choice.isnumeric():
+        choice = "".join(set(choice))
 
     print("Subscribe successful: ", fn, ln, netid, choice, os.getpid())
 
@@ -90,7 +93,36 @@ def subscribe():
         response = makeJsonRspWithMsg(str(e), 500)
         return response
 
-@app.route('/unsubscribe', methods=['GET'])
+@app.route('/updateSubscription', methods=['PUT'])
+def updateSubscription():
+    fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
+    fn, ln, netid = preprocessInput(fn, ln, netid)
+
+    if not validateData(fn, ln, netid):
+        response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 500)
+        return response
+
+    if choice not in ["day", "weekday"] and not choice.isnumeric():
+        response = makeJsonRspWithMsg("Illegal mail frequency choice.", 200)
+        return response
+
+    if choice.isnumeric():
+        choice = "".join(set(choice))
+
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    selectst = f'SELECT * FROM tbl_user WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+    cursor.execute(selectst)
+    data = cursor.fetchall()
+    if len(data) > 0: # User exists
+        updSt = f'UPDATE tbl_user SET mail_freq="{choice}" WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+        cursor.execute(updSt)
+        conn.commit()
+        return makeJsonRspWithMsg("Update successful", 200)
+
+    return makeJsonRspWithMsg(f"No user with ID {fn.capitalize()} {ln.capitalize()} {netid} found.", 500)
+
+@app.route('/unsubscribe', methods=['DELETE'])
 def unsubscribe():
     fn, ln, netid = request.args.get('fn'), request.args.get('ln'), request.args.get('netid')
     fn, ln, netid = preprocessInput(fn, ln, netid)

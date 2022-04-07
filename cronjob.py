@@ -17,9 +17,11 @@ def sendEveryoneEmails():
     for u in cursor:
         time.sleep(2)
         id, fn, ln, netid, choice = u
-        if choice == "weekday" and datetime.date.today().weekday() < 5:
+        if choice == "weekday" and datetime.date.today().weekday() < 5: # 0 is mon, 6 is sunday
             sendMail(fn, ln, netid)
         elif choice == "day":
+            sendMail(fn, ln, netid)
+        elif str(datetime.date.today().weekday()) in choice: # choice could be like "01234" for weekdays
             sendMail(fn, ln, netid)
 
     cursor.close()
@@ -35,19 +37,6 @@ def sendLeoEmail():
         id, fn, ln, netid, choice = u
         if netid == "zl3493":
             sendMail(fn, ln, netid)
-
-    cursor.close()
-
-def sendAFEmail():
-    print("--SENDING APRIL FOOLS EMAIL--", time.time(), os.getpid())
-    cursor = conn.cursor()
-    query = ("SELECT * FROM tbl_user;")
-    cursor.execute(query)
-
-    for u in cursor:
-        time.sleep(2)
-        id, fn, ln, netid, choice = u
-        sendMail("http://www.nyupremiumpass.com/", "", netid)
 
     cursor.close()
 
@@ -68,7 +57,5 @@ if runnow == "run":
     sendEveryoneEmails()
 if runnow == "leo":
     sendLeoEmail()
-if runnow == "april":
-    sendAFEmail()
 
 conn.close()

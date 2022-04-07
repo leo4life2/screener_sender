@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { Component } from "react";
 import { Text, TextInput, View, TouchableOpacity } from 'react-native';
 import Select from 'react-select'
 import Header from "./Header";
@@ -12,7 +12,7 @@ class App extends Component {
       fn: localStorage.getItem("fName"),
       ln: localStorage.getItem("lName"),
       netid: localStorage.getItem("netId"),
-      choice: "",
+      choice: [{value: "01234", label: "weekday"}],
       buttonDisabled: false
     };
   }
@@ -33,8 +33,11 @@ class App extends Component {
   };
 
   _subscribe() {
-    fetch(`/subscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${this.state.choice}`, {
-        'method':'GET',
+    if (this.state.choice.length <= 0) {alert("You did not choose any days."); return;}
+    const choicesString = this.state.choice.reduce((accumulator, item) => accumulator += item.value, '')
+    console.log(choicesString);
+    fetch(`/subscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${choicesString}`, {
+        'method':'POST',
         headers : {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -43,8 +46,27 @@ class App extends Component {
     )
     .then(response=>response.json())
     .then(data=> {
-      console.log("after subscribe.")
-      console.log(data);
+      alert(data.message);
+     });
+     localStorage.setItem("fName", this.state.fn);
+     localStorage.setItem("lName", this.state.ln);
+     localStorage.setItem("netId", this.state.netid);
+  };
+
+  _updateSub() {
+    if (this.state.choice.length <= 0) {alert("You did not choose any days."); return;}
+    const choicesString = this.state.choice.reduce((accumulator, item) => accumulator += item.value, '')
+    console.log(choicesString);
+    fetch(`/updateSubscription?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${choicesString}`, {
+        'method':'PUT',
+        headers : {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }
+    )
+    .then(response=>response.json())
+    .then(data=> {
       alert(data.message);
      });
      localStorage.setItem("fName", this.state.fn);
@@ -54,7 +76,7 @@ class App extends Component {
 
   _unsubscribe() {
     fetch(`/unsubscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}`, {
-        'method':'GET',
+        'method':'DELETE',
         headers : {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -93,10 +115,17 @@ class App extends Component {
       title: "Get one every",
       choicesPlaceHolder: "choose day",
       choices: [
-        {value: "weekday", label: "weekday"},
-        {value: "day", label: "day"}
+        {value: "01234", label: "weekday"},
+        {value: "0123456", label: "day"},
+        {value: "0", label: "mon"},
+        {value: "1", label: "tues"},
+        {value: "2", label: "wed"},
+        {value: "3", label: "thurs"},
+        {value: "4", label: "fri"},
+        {value: "5", label: "sat"},
+        {value: "6", label: "sun"}
       ],
-      subtitle: "Unsubscribe at any time."
+      subtitle: "Unsubscribe at any time. \n Existing users can update send options."
     };
 
     const headerStyle = {
@@ -115,7 +144,7 @@ class App extends Component {
         fontFamily: "Roboto",
         fontSize: 48,
         fontWeight: 900,
-        color: '#3F3CC2',
+        color: '#3F3CC2'
       }),
 
       singleValue: (styles) => {
@@ -124,6 +153,11 @@ class App extends Component {
           color: '#3F3CC2',
         }
       },
+
+      valueContainer: (provided) => ({
+        ...provided,
+        justifyContent: "center"
+      }),
 
       indicatorSeparator: (styles) => ({display:'none'}),
       placeholder: (defaultStyles) => {
@@ -197,7 +231,6 @@ class App extends Component {
 
     const buttonStyles = {
       marginTop: 53,
-      width: "30%",
       height: 67,
       backgroundColor: "#3F3CC2",
       borderRadius: 10,
@@ -206,16 +239,44 @@ class App extends Component {
 
     const unsubscribeStyle = {
       marginTop: 23,
-      width: "20%",
-      height: 25,
+      marginLeft: 5,
+      marginRight: 5,
+      height: 40,
       justifyContent: "center",
+      borderRadius: 5,
+      paddingTop: 2,
+      paddingLeft: 5,
+      paddingRight: 5,
+      paddingBottom: 2,
+      borderWidth: 0.5,
+      borderColor: "#EB5757"
+    };
+
+    const updateStyle = {
+      marginTop: 23,
+      marginLeft: 5,
+      marginRight: 5,
+      width: unsubscribeStyle.width,
+      height: 40,
+      justifyContent: "center",
+      borderRadius: 5,
+      paddingTop: 2,
+      paddingLeft: 20,
+      paddingRight: 20,
+      paddingBottom: 2,
+      borderWidth: 0.5,
+      borderColor: "#8684CF"
     };
 
     const BigButton = ({text}) => {
       return (
         <TouchableOpacity
           onPress={() => {
-             text == "Subscribe" ? this._subscribe() : this._getOne()
+            console.log(text);
+
+             if (text == "Subscribe") {this._subscribe()}
+             else {this._getOne()}
+
              this.setState({
                 buttonDisabled: true,
               });
@@ -233,6 +294,8 @@ class App extends Component {
             style={{
               alignSelf: 'center',
               fontFamily: "Avenir",
+              marginLeft: 10,
+              marginRight: 10,
               fontSize: 24,
               fontWeight: 900,
               color: "#fff"
@@ -258,10 +321,16 @@ class App extends Component {
             <Text style={headerStyle}>{subscribeBox.title}</Text>
             <Select
               options={subscribeBox.choices}
+              defaultValue={subscribeBox.choices[0]}
+              isMulti
+              closeMenuOnSelect={false}
               styles={chooseMenuStyle}
               placeholder="choose day"
               isSearchable={false}
-              onChange={(val) => this.setState({choice:val.value})}
+              onChange={(choices) => {
+                console.log(choices);
+                 this.setState({choice: choices});
+               }}
               >
             </Select>
 
@@ -295,7 +364,42 @@ class App extends Component {
                 >
               </TextInput>
             </View>
+
             <BigButton text="Subscribe"></BigButton>
+
+            <View style={[styles.container, {
+              flexDirection: "row",
+              justifyContent: "center",
+              width: "100%"
+            }]}>
+
+            <TouchableOpacity
+              onPress={() => {
+                this._updateSub()
+                 this.setState({
+                    buttonDisabled: true,
+                  });
+                  setTimeout(() => {
+                      this.setState(() => ({
+                        buttonDisabled: false,
+                      }));
+                    }, 2000); // 2 second cooldown
+               }}
+              style={updateStyle}
+              disabled={this.state.buttonDisabled}
+              >
+              <Text
+                style={{
+                  alignSelf: 'center',
+                  fontFamily: "Avenir",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: "#8684CF",
+                }}>
+                {"Update"}
+              </Text>
+
+            </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => {
@@ -318,12 +422,14 @@ class App extends Component {
                   fontFamily: "Avenir",
                   fontSize: 18,
                   fontWeight: 800,
-                  color: "#828282"
+                  color: "#EB5757"
                 }}>
                 {"Unsubscribe"}
               </Text>
 
             </TouchableOpacity>
+
+            </View>
           </View>
 
           <View style={containerStyle}>
