@@ -8,21 +8,36 @@ HOST = os.getenv("DB_HOST")
 
 conn = mysql.connector.connect(user=USER, password=PW, host=HOST, database=NAME)
 
+def getIsSummer():
+    year = datetime.date.today().year
+    summer_start = datetime.date(year, 5, 20)
+    summer_end = datetime.date(year, 8, 20)
+
+    return summer_start <= datetime.date.today() <= summer_end
+
 def sendEveryoneEmails():
     print("--SENDING EVERYONE EMAILS--", time.time(), os.getpid())
     cursor = conn.cursor()
     query = ("SELECT * FROM tbl_user;")
     cursor.execute(query)
 
+    is_summer = getIsSummer()
+
     for u in cursor:
-        time.sleep(2)
-        id, fn, ln, netid, choice = u
+        id, fn, ln, netid, choice, send_summer = u
+        send_summer = int(send_summer)
+
+        if is_summer and not send_summer: # skip people that didnt opt in for summer.
+            continue
+
         if choice == "weekday" and datetime.date.today().weekday() < 5: # 0 is mon, 6 is sunday
             sendMail(fn, ln, netid)
         elif choice == "day":
             sendMail(fn, ln, netid)
         elif str(datetime.date.today().weekday()) in choice: # choice could be like "01234" for weekdays
             sendMail(fn, ln, netid)
+
+        time.sleep(2)
 
     cursor.close()
 
@@ -32,9 +47,16 @@ def sendLeoEmail():
     query = ("SELECT * FROM tbl_user;")
     cursor.execute(query)
 
+    is_summer = getIsSummer()
+
     for u in cursor:
         print(u)
-        id, fn, ln, netid, choice = u
+        id, fn, ln, netid, choice, send_summer = u
+        send_summer = int(send_summer)
+
+        if is_summer and not send_summer:
+            continue
+
         if netid == "zl3493":
             sendMail(fn, ln, netid)
 

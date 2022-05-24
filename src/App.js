@@ -13,6 +13,7 @@ class App extends Component {
       ln: localStorage.getItem("lName"),
       netid: localStorage.getItem("netId"),
       choice: [{value: "01234", label: "weekday"}],
+      send_summer: false,
       buttonDisabled: false
     };
   }
@@ -36,7 +37,7 @@ class App extends Component {
     if (this.state.choice.length <= 0) {alert("You did not choose any days."); return;}
     const choicesString = this.state.choice.reduce((accumulator, item) => accumulator += item.value, '')
     console.log(choicesString);
-    fetch(`/subscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${choicesString}`, {
+    fetch(`/subscribe?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${choicesString}&summer=${this.state.send_summer}`, {
         'method':'POST',
         headers : {
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ class App extends Component {
     if (this.state.choice.length <= 0) {alert("You did not choose any days."); return;}
     const choicesString = this.state.choice.reduce((accumulator, item) => accumulator += item.value, '')
     console.log(choicesString);
-    fetch(`/updateSubscription?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${choicesString}`, {
+    fetch(`/updateSubscription?fn=${this.state.fn}&ln=${this.state.ln}&netid=${this.state.netid}&choice=${choicesString}&summer=${this.state.send_summer}`, {
         'method':'PUT',
         headers : {
           'Content-Type': 'application/json',
@@ -125,7 +126,7 @@ class App extends Component {
         {value: "5", label: "sat"},
         {value: "6", label: "sun"}
       ],
-      subtitle: "Unsubscribe at any time. \n Existing users can update send options."
+      subtitle: "To unsubscribe or update settings:\nPress buttons below the subscribe button."
     };
 
     const headerStyle = {
@@ -184,7 +185,6 @@ class App extends Component {
 
     const subtitleStyle = {
       paddingTop: 36,
-      paddingBottom: 53,
 
       fontFamily: "Roboto",
       fontSize: 24,
@@ -192,6 +192,21 @@ class App extends Component {
       color: "#333333",
       textAlign: "center"
     };
+
+    const checkboxLabelStyle = {
+      marginLeft: 10,
+      fontFamily: "Roboto",
+      fontSize: 24,
+      fontWeight: 600,
+      color: "#333333",
+      verticalAlign: "middle"
+    }
+
+    const checkboxStyle = {
+      width: 30,
+      height: 30,
+      verticalAlign: "middle"
+    }
 
     const containerStyle = {
       paddingTop: 36,
@@ -202,6 +217,7 @@ class App extends Component {
     };
 
     const inputBoxStyle = {
+      marginTop: 53,
       paddingLeft: 20,
       paddingRight: 20,
       width: "60%",
@@ -334,7 +350,13 @@ class App extends Component {
               >
             </Select>
 
+            <div style={{marginTop: 10}}>
+                <input style={checkboxStyle} onChange={(e) => {this.setState({send_summer:e.target.checked})}} type="checkbox" checked={this.state.send_summer} />
+                <Text style={checkboxLabelStyle}>Send during summer</Text>
+            </div>
+
             <Text style={subtitleStyle}>{subscribeBox.subtitle}</Text>
+
             <View style={inputBoxStyle}>
               <TextInput
                 name="fn"

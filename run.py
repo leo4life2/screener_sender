@@ -54,8 +54,11 @@ def getOneEmail():
 
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
-    fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
+    fn, ln, netid, choice, summer = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice'), request.args.get('summer')
     fn, ln, netid = preprocessInput(fn, ln, netid)
+
+    summer = True if summer.lower() == "true" else False
+    summer = int(summer)
 
     print("Subscribe attempt: ", fn, ln, netid, choice, os.getpid())
 
@@ -70,8 +73,6 @@ def subscribe():
     if choice.isnumeric():
         choice = "".join(set(choice))
 
-    print("Subscribe successful: ", fn, ln, netid, choice, os.getpid())
-
     conn = mysql.connect()
     cursor = conn.cursor()
     cursor.execute(f"select * from tbl_user where user_netid = \"{netid}\"")
@@ -83,10 +84,11 @@ def subscribe():
         sendMail(fn, ln, netid)
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute(f"insert into tbl_user(user_fn, user_ln, user_netid, mail_freq) values (\"{fn}\", \"{ln}\", \"{netid}\", \"{choice}\");")
+        cursor.execute(f"insert into tbl_user(user_fn, user_ln, user_netid, mail_freq, send_summer) values (\"{fn}\", \"{ln}\", \"{netid}\", \"{choice}\", \"{summer}\");")
         conn.commit()
 
         response = makeJsonRspWithMsg("Subscribe successful!", 200)
+        print("Subscribe successful: ", fn, ln, netid, choice, os.getpid())
         return response
     except Exception as e:
         print(e)
@@ -95,8 +97,11 @@ def subscribe():
 
 @app.route('/updateSubscription', methods=['PUT'])
 def updateSubscription():
-    fn, ln, netid, choice = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice')
+    fn, ln, netid, choice, summer = request.args.get('fn'), request.args.get('ln'), request.args.get('netid'), request.args.get('choice'), request.args.get('summer')
     fn, ln, netid = preprocessInput(fn, ln, netid)
+
+    summer = True if summer.lower() == "true" else False
+    summer = int(summer)
 
     if not validateData(fn, ln, netid):
         response = makeJsonRspWithMsg("Illegal input. Please check your inputs.", 500)
@@ -115,7 +120,7 @@ def updateSubscription():
     cursor.execute(selectst)
     data = cursor.fetchall()
     if len(data) > 0: # User exists
-        updSt = f'UPDATE tbl_user SET mail_freq="{choice}" WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
+        updSt = f'UPDATE tbl_user SET mail_freq="{choice}", send_summer="{summer}" WHERE user_netid="{netid}" AND user_fn="{fn}" AND user_ln="{ln}"'
         cursor.execute(updSt)
         conn.commit()
         return makeJsonRspWithMsg("Update successful", 200)
